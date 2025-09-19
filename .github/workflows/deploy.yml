@@ -60,8 +60,10 @@ jobs:
             pip install -r app/requirements.txt
 
             # Restart Gunicorn with PM2
-            pm2 delete python-app || true
-            pm2 start venv/bin/gunicorn --name python-app -- -b 127.0.0.1:5000 app:app
+            sudo systemctl stop flaskapp || true
+            sudo systemctl daemon-reload
+            sudo systemctl start flaskapp
+            sudo systemctl enable flaskapp
 
             # Create Nginx config (overwrite each time to avoid drift)
             sudo tee /etc/nginx/sites-available/flaskapp > /dev/null <<'EOL'
