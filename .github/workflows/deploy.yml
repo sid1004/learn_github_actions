@@ -1,16 +1,14 @@
-name: Deploy Python App to EC2
+name: Flask CI/CD
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [main]
 
 jobs:
-  deploy:
+  build-test-deploy:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -19,18 +17,22 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt
+          pip install -r app/requirements.txt
+          pip install pytest
 
-      - name: Copy files to EC2
+      - name: Run tests
+        run: pytest
+
+      - name: Copy app to EC2
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
-          source: "."
+          source: "app/*"
           target: "/home/ubuntu/app"
 
-      - name: Restart App on EC2
+      - name: Deploy & start app on EC2
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -38,14 +40,10 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           script: |
             cd /home/ubuntu/app
-            sudo apt install -y python3-venv
             python3 -m venv venv
-            source venv/bin/activate
+            . venv/bin/activate
             pip install -r requirements.txt
-            pip install gunicorn
-            pm2 delete python-app || true
-            pm2 start venv/bin/python3 --name "python-app" -- \
-             venv/bin/gunicorn app:app -b 0.0.0.0:5000
+            pm2 delete flask-app || true
+            pm2 start "gunicorn app:app -b 127.0.0.1:5000" --name flask-app --interpreter python3
             pm2 save
-            ls -l venv/bin/gunicorn
-
+            sudo systemctl restart nginx
