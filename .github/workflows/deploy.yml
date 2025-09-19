@@ -38,7 +38,7 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           script: |
             cd /home/ubuntu/app
-            pip3 install -r requirements.txt
+            apt install -r requirements.txt
             pm2 delete python-app || true
             pm2 start gunicorn --name "python-app" -- app:app -b 0.0.0.0:5000
             pm2 save
