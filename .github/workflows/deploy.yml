@@ -36,6 +36,13 @@ jobs:
           source: "."
           target: "/home/ubuntu/app"
 
+      - name: Install Node.js & PM2
+        run: |
+          curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+          sudo apt-get install -y nodejs
+          sudo npm install -g pm2
+
+
       # 4. Deploy on EC2 (with Nginx auto-config)
       - name: Deploy on EC2
         uses: appleboy/ssh-action@v1.2.0
