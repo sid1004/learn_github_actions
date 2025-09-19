@@ -44,7 +44,8 @@ jobs:
             pip install -r requirements.txt
             pip install gunicorn
             pm2 delete python-app || true
-            pm2 start "gunicorn app:app -b 0.0.0.0:5000" --name python-app --interpreter python3
+            pm2 start venv/bin/python3 --name "python-app" -- \
+             venv/bin/gunicorn app:app -b 0.0.0.0:5000
             pm2 save
             ls -l venv/bin/gunicorn
 
