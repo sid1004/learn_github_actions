@@ -50,7 +50,7 @@ jobs:
             # Ensure Python venv & dependencies
             python3 -m venv venv
             source venv/bin/activate
-            pip install -r requirements.txt
+            pip install -r app/requirements.txt
 
             # Restart Gunicorn with PM2
             pm2 delete python-app || true
